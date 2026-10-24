@@ -87,6 +87,15 @@ def print_report(rep_dict: dict):
         badge = "[PASS]" if audit["passed"] else "[FLAGGED/CORRECTED]"
         print(f"  * {badge} {audit['rule_name']}: {audit['details']}")
 
+    if rep_dict.get("world_model_summary"):
+        wm = rep_dict["world_model_summary"]
+        print("\n10. METERLESS WORLD MODEL PROJECTION (Official Spec):")
+        print(f"  * Context ID           : {wm['context_id']}")
+        print(f"  * Total Logged Events  : {wm['event_count']} (Append-Only Canonical Store)")
+        print(f"  * Total Graph Entities : {wm['entity_count']} (Content-Addressed Stable IDs)")
+        print(f"  * Total Relationships  : {wm['relationship_count']} (Scoped Typed Edges)")
+        print(f"  * Reconstructible State: {wm['dispute_state'].upper()}")
+
     print("=" * 80)
 
 

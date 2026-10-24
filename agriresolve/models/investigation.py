@@ -141,6 +141,7 @@ class InvestigationReport:
     human_review_requirements: List[str]
     recommended_next_actions: List[str]
     audit_findings: List[Dict[str, Any]] = field(default_factory=list)
+    world_model_summary: Optional[Dict[str, Any]] = None
     generated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
@@ -165,5 +166,6 @@ class InvestigationReport:
             "human_review_requirements": self.human_review_requirements,
             "recommended_next_actions": self.recommended_next_actions,
             "audit_findings": self.audit_findings,
+            "world_model_summary": self.world_model_summary,
             "generated_at": self.generated_at,
         }

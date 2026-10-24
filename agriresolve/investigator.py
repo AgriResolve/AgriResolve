@@ -7,6 +7,7 @@ deterministic math, contradiction detection, self-auditing, and actionable evide
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from .adapters.fixtures import SyntheticFixtureRepository
 from .adapters.zetaris import ZetarisAdapter
@@ -41,6 +42,12 @@ from .tools.evidence_tools import (
     ScopedEvidenceRetrievalTool,
 )
 from .tools.registry import PolicyLimitExceededError, ToolRegistry
+from .world_model.engine import WorldModel
+from .world_model.stable_id import (
+    compute_content_checksum,
+    compute_stable_entity_id,
+)
+from .world_model.types import Provenance
 
 logger = logging.getLogger("agriresolve.investigator")
 
@@ -55,10 +62,12 @@ class AgriResolveInvestigator:
         config: Optional[AgriResolveConfig] = None,
         power_client: Optional[PowerLayerClient] = None,
         zetaris_adapter: Optional[ZetarisAdapter] = None,
+        world_model: Optional[WorldModel] = None,
     ):
         self.config = config or AgriResolveConfig.from_env()
         self.power_client = power_client or NemotronPowerClient(self.config.power)
         self.zetaris_adapter = zetaris_adapter or ZetarisAdapter(self.config.zetaris)
+        self.world_model = world_model or WorldModel()
 
         # Initialize Controlled Tool Registry
         self.tool_registry = ToolRegistry(self.config.policy)
@@ -139,10 +148,54 @@ class AgriResolveInvestigator:
         questions = initial_questions or (bundle.get("questions", []) if bundle else [])
 
         # =========================================================================
+        # Meterless World Model Context Initialization
+        # =========================================================================
+        ctx_id = self.world_model.upsert_context(
+            context_type="dispute",
+            canonical_key=valid_dispute_id,
+            attrs={"dispute_id": valid_dispute_id, "title": bundle.get("title", valid_dispute_id) if bundle else valid_dispute_id},
+        )
+        self.world_model.transition_state(
+            context_id=ctx_id,
+            from_state="uninitialized",
+            to_state=InvestigationState.INVESTIGATING.value,
+            reason="Investigation workflow initiated",
+        )
+
+        # =========================================================================
         # Stage A: Understand the dispute
         # =========================================================================
         self.tool_registry.start_new_step()
         logger.info(f"Stage A: Analyzing dispute {valid_dispute_id} with {len(claims)} party claims.")
+        for claim in claims:
+            now_iso = datetime.now(timezone.utc).isoformat()
+            p_prov = Provenance(
+                source_id=f"party_{claim.party}",
+                source_type="party_entity",
+                recorded_at=now_iso,
+                checksum=compute_content_checksum(claim.party),
+            )
+            party_id = self.world_model.upsert_entity(
+                entity_type="party",
+                canonical_key=claim.party,
+                attrs={"name": claim.party},
+                provenance=p_prov,
+                context_id=ctx_id,
+            )
+            c_prov = Provenance(
+                source_id=f"claim_{claim.party}_{claim.category.value}",
+                source_type="party_allegation",
+                recorded_at=now_iso,
+                checksum=compute_content_checksum(claim.to_dict()),
+            )
+            claim_id = self.world_model.upsert_entity(
+                entity_type="claim",
+                canonical_key=f"{claim.party}:{claim.category.value}",
+                attrs=claim.to_dict(),
+                provenance=c_prov,
+                context_id=ctx_id,
+            )
+            self.world_model.relate(party_id, "asserts", claim_id, context_id=ctx_id)
 
         # =========================================================================
         # Stage B: Determine what evidence is needed
@@ -186,12 +239,51 @@ class AgriResolveInvestigator:
             for c in changes:
                 assumptions_and_limitations.append(f"Stage G Reassessment: {c}")
 
+        # Ingest all evidence documents into World Model with mandatory provenance
+        for item in evidence_store:
+            now_iso = item.recorded_at or datetime.now(timezone.utc).isoformat()
+            doc_prov = Provenance(
+                source_id=item.source_id,
+                source_type=item.evidence_type.value,
+                recorded_at=now_iso,
+                checksum=compute_content_checksum(item.to_dict()),
+                metadata={"author": item.author_or_issuer, "synthetic": item.is_synthetic},
+            )
+            doc_id = self.world_model.upsert_entity(
+                entity_type="evidence_document",
+                canonical_key=item.source_id,
+                attrs=item.to_dict(),
+                provenance=doc_prov,
+                context_id=ctx_id,
+            )
+            rel_type = "governs" if item.evidence_type == EvidenceType.CONTRACT else "evidences"
+            self.world_model.relate(doc_id, rel_type, ctx_id, context_id=ctx_id)
+
         # =========================================================================
         # Stage D: Evaluate the evidence (dates, comparability, contradictions)
         # =========================================================================
         self.tool_registry.start_new_step()
         chronology = EvidenceAnalyzer.analyze_chronology(evidence_store)
         contradictions = EvidenceAnalyzer.detect_contradictions(claims, evidence_store)
+
+        for c in contradictions:
+            now_iso = datetime.now(timezone.utc).isoformat()
+            c_prov = Provenance(
+                source_id=c.contradiction_id,
+                source_type="contradiction_detection",
+                recorded_at=now_iso,
+                checksum=compute_content_checksum(c.to_dict()),
+            )
+            contr_id = self.world_model.upsert_entity(
+                entity_type="contradiction",
+                canonical_key=c.contradiction_id,
+                attrs=c.to_dict(),
+                provenance=c_prov,
+                context_id=ctx_id,
+            )
+            for src_id in c.source_ids_involved:
+                doc_ent_id = compute_stable_entity_id("evidence_document", src_id)
+                self.world_model.relate(doc_ent_id, "conflicts_in", contr_id, context_id=ctx_id)
 
         # =========================================================================
         # Stage E & F: Decide whether more investigation is needed / Request missing evidence
@@ -201,6 +293,21 @@ class AgriResolveInvestigator:
         if evidence_requests:
             state = InvestigationState.AWAITING_EVIDENCE
             for req in evidence_requests:
+                now_iso = datetime.now(timezone.utc).isoformat()
+                req_prov = Provenance(
+                    source_id=req.request_id,
+                    source_type="evidence_request",
+                    recorded_at=now_iso,
+                    checksum=compute_content_checksum(req.to_dict()),
+                )
+                req_id = self.world_model.upsert_entity(
+                    entity_type="evidence_request",
+                    canonical_key=req.request_id,
+                    attrs=req.to_dict(),
+                    provenance=req_prov,
+                    context_id=ctx_id,
+                )
+                self.world_model.relate(ctx_id, "requires_evidence", req_id, context_id=ctx_id)
                 what_could_change.append(
                     f"Receipt of '{req.missing_item}' from {req.who_could_provide_it} could alter: {req.which_finding_it_could_change}."
                 )
@@ -363,6 +470,37 @@ class AgriResolveInvestigator:
                 c.is_resolved = True
                 c.reconciliation_attempt = "Resolved by disallowing unauthorized invoice deduction from verified financial settlement."
 
+        # Record observations for deterministic calculations into World Model
+        for calc in calculations:
+            calc_prov = Provenance(
+                source_id=calc.calculation_name,
+                source_type="deterministic_calculation",
+                recorded_at=datetime.now(timezone.utc).isoformat(),
+                checksum=compute_content_checksum(calc.to_dict()),
+            )
+            self.world_model.record_observation(ctx_id, calc.calculation_name, calc.to_dict(), provenance=calc_prov)
+
+        # Ingest findings into World Model with explicit traceable provenance edges
+        for f in findings:
+            now_iso = datetime.now(timezone.utc).isoformat()
+            f_prov = Provenance(
+                source_id=f"finding_{f['question_id']}",
+                source_type="investigative_finding",
+                recorded_at=now_iso,
+                checksum=compute_content_checksum(f),
+            )
+            finding_id = self.world_model.upsert_entity(
+                entity_type="finding",
+                canonical_key=f"{valid_dispute_id}:{f['question_id']}",
+                attrs=f,
+                provenance=f_prov,
+                context_id=ctx_id,
+            )
+            for src_id in f.get("supported_by", []):
+                doc_ent_id = compute_stable_entity_id("evidence_document", src_id)
+                self.world_model.relate(finding_id, "derived_from", doc_ent_id, context_id=ctx_id)
+                self.world_model.relate(doc_ent_id, "supports", finding_id, context_id=ctx_id)
+
         # =========================================================================
         # Qualitative Nemotron Reasoning (Power Layer)
         # =========================================================================
@@ -458,6 +596,22 @@ class AgriResolveInvestigator:
                 "consequence": "Standard Minary formula applies, reducing payable weight to equivalent dry matter.",
             })
 
+        # Transition World Model to final audited investigation state
+        self.world_model.transition_state(
+            context_id=ctx_id,
+            from_state=InvestigationState.INVESTIGATING.value,
+            to_state=final_state.value,
+            reason=f"Investigation workflow concluded with state: {final_state.value}",
+        )
+
+        world_model_summary = {
+            "context_id": ctx_id,
+            "event_count": self.world_model.store.count(),
+            "entity_count": len(self.world_model.graph_view.entities),
+            "relationship_count": len(self.world_model.graph_view.relationships),
+            "dispute_state": self.world_model.dispute_view.current_state,
+        }
+
         report = InvestigationReport(
             dispute_id=valid_dispute_id,
             summary=f"AgriResolve investigation report for dispute {valid_dispute_id}. State: {final_state.value.upper()}.",
@@ -483,6 +637,7 @@ class AgriResolveInvestigator:
             human_review_requirements=human_review_reqs,
             recommended_next_actions=recommended_actions or ["Execute settlement per verified figures."],
             audit_findings=[a.__dict__ for a in audit_findings],
+            world_model_summary=world_model_summary,
         )
 
         return report

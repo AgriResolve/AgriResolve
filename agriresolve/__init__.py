@@ -7,6 +7,7 @@ from .config import AgriResolveConfig, PowerLayerConfig, ZetarisConfig, Investig
 from .investigator import AgriResolveInvestigator
 from .models.enums import InvestigationState, DisputeCategory, EvidenceType
 from .models.investigation import InvestigationReport
+from .world_model.engine import WorldModel
 
 __version__ = "0.1.0"
 
@@ -20,4 +21,5 @@ __all__ = [
     "DisputeCategory",
     "EvidenceType",
     "InvestigationReport",
+    "WorldModel",
 ]
