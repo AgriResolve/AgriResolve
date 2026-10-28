@@ -136,7 +136,21 @@ get_trade_count() -> u64
 
 ---
 
-## 4. Verification & Testing
+## 4. Deployed Testnet Deployment
+
+AgriResolve is deployed and active on Stellar Soroban Testnet:
+
+| Resource | Address / ID |
+|---|---|
+| **AgriResolve Contract** | [`CAPZ2NHR5OYR45WH4BBFVKRG2UYII6P3DD3JNP6CJ6LQ4GJDZVOGITQ4`](https://stellar.expert/explorer/testnet/contract/CAPZ2NHR5OYR45WH4BBFVKRG2UYII6P3DD3JNP6CJ6LQ4GJDZVOGITQ4) |
+| **SEP-41 USDC Token** | [`CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK`](https://stellar.expert/explorer/testnet/contract/CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK) |
+| **Admin Deployer** | [`GCBOKYT7TAARXDILFZ43QX2WWIRHAWA2S3V3ZP7EWN4KWTDIBS3NQS4Y`](https://stellar.expert/explorer/testnet/account/GCBOKYT7TAARXDILFZ43QX2WWIRHAWA2S3V3ZP7EWN4KWTDIBS3NQS4Y) |
+| **Testnet RPC** | `https://soroban-testnet.stellar.org` |
+| **Testnet Network Passphrase** | `Test SDF Network ; September 2015` |
+
+---
+
+## 5. Verification & Testing
 
 ### 1. Smart Contract (`agriresolve-contract`)
 

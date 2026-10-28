@@ -1,7 +1,7 @@
 export const NETWORK_CONFIG = {
   rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || "https://soroban-testnet.stellar.org",
   networkPassphrase: process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE || "Test SDF Network ; September 2015",
-  contractId: process.env.NEXT_PUBLIC_CONTRACT_ID || "CAAGRIRESOLVE_ESCROW_ENGINE_TESTNET",
+  contractId: process.env.NEXT_PUBLIC_CONTRACT_ID || "CAPZ2NHR5OYR45WH4BBFVKRG2UYII6P3DD3JNP6CJ6LQ4GJDZVOGITQ4",
   usdcAddress: process.env.NEXT_PUBLIC_USDC_ADDRESS || "CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK",
 };
 
