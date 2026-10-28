@@ -210,4 +210,4 @@ python3 server.py
 
 ## License
 
-MIT License. Built for the Stellar Community & Drips Wave 11.
+MIT License.
