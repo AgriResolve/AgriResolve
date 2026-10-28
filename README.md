@@ -138,13 +138,13 @@ get_trade_count() -> u64
 
 ## 4. Deployed Testnet Deployment
 
-AgriResolve is deployed and active on Stellar Soroban Testnet:
+AgriResolve is configured for Stellar Soroban Testnet:
 
 | Resource | Address / ID |
 |---|---|
-| **AgriResolve Contract** | [`CAPZ2NHR5OYR45WH4BBFVKRG2UYII6P3DD3JNP6CJ6LQ4GJDZVOGITQ4`](https://stellar.expert/explorer/testnet/contract/CAPZ2NHR5OYR45WH4BBFVKRG2UYII6P3DD3JNP6CJ6LQ4GJDZVOGITQ4) |
-| **SEP-41 USDC Token** | [`CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK`](https://stellar.expert/explorer/testnet/contract/CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK) |
-| **Admin Deployer** | [`GCBOKYT7TAARXDILFZ43QX2WWIRHAWA2S3V3ZP7EWN4KWTDIBS3NQS4Y`](https://stellar.expert/explorer/testnet/account/GCBOKYT7TAARXDILFZ43QX2WWIRHAWA2S3V3ZP7EWN4KWTDIBS3NQS4Y) |
+| **AgriResolve Contract** | `<CONTRACT_ID>` |
+| **SEP-41 USDC Token** | `<USDC_TOKEN_ID>` |
+| **Admin Deployer** | `<ADMIN_ADDRESS>` |
 | **Testnet RPC** | `https://soroban-testnet.stellar.org` |
 | **Testnet Network Passphrase** | `Test SDF Network ; September 2015` |
 
@@ -199,7 +199,7 @@ python3 server.py
 
 ---
 
-## 5. Security & Protocol Invariants
+## 6. Security & Protocol Invariants
 
 1. **Strict Role-Based Validation**: Only the designated `buyer` can fund, only the designated `farmer` can confirm delivery, and only the authorized `arbiter` (or AI oracle multi-sig) can execute resolution splits.
 2. **Mathematical Invariant Conservation**: In `execute_resolution`, the contract enforces `buyer_share + farmer_share == trade.amount` with checked integer arithmetic, preventing underflow, overflow, or stranded funds.
