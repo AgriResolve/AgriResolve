@@ -65,7 +65,7 @@ class ProofBridge:
     """Executes AI dispute investigation and bridges findings to on-chain escrow parameters."""
 
     def __init__(self, config: Optional[AgriResolveConfig] = None):
-        self.config = config or AgriResolveConfig()
+        self.config = config or AgriResolveConfig.from_env()
         self.power_client = MockNemotronPowerClient()
         self.investigator = AgriResolveInvestigator(
             config=self.config, power_client=self.power_client
@@ -95,8 +95,10 @@ class ProofBridge:
         # Compute evidence cryptographic hashes
         evidence_hashes = []
         for finding in report.findings:
+            qid = finding["question_id"] if isinstance(finding, dict) else getattr(finding, "question_id", str(finding))
+            ftext = finding["finding"] if isinstance(finding, dict) else getattr(finding, "finding", str(finding))
             raw_hash = hashlib.sha256(
-                f"{finding.question_id}:{finding.finding}".encode("utf-8")
+                f"{qid}:{ftext}".encode("utf-8")
             ).hexdigest()
             evidence_hashes.append(raw_hash)
 
