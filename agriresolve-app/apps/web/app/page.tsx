@@ -3,21 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth, UserRole } from "../lib/auth";
-import { LeafLogo } from "../components/LeafLogo";
 import {
-  FileText,
   ShieldCheck,
   Check,
-  ExternalLink,
   ArrowRight,
-  Upload,
-  Copy,
-  Users,
-  Building2,
   Wheat,
+  Building2,
   Gavel,
-  CheckCircle2,
-  FileUp,
+  Lock,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -50,31 +43,32 @@ export default function LandingPage() {
           </p>
         </div>
 
-        {/* Primary Action Buttons */}
+        {/* Primary Action Buttons: Sign Up & Sign In */}
         <div className="pt-2 flex flex-wrap items-center gap-3">
-          <Link
-            href="/dashboard"
-            className="bg-[#1E4D2B] hover:bg-[#173B21] text-white font-semibold text-sm px-6 py-3 rounded-md transition-colors flex items-center gap-2 cursor-pointer"
-          >
-            <span>Enter Dashboard</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-
-          {!user && (
+          {!user ? (
             <>
+              <Link
+                href="/signup"
+                className="bg-[#1E4D2B] hover:bg-[#173B21] text-white font-semibold text-sm px-6 py-3 rounded-md transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                <span>Create Account</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
               <Link
                 href="/login"
                 className="bg-white hover:bg-stone-50 border border-[#D1D9D1] text-stone-900 font-semibold text-sm px-6 py-3 rounded-md transition-colors cursor-pointer"
               >
                 Sign In
               </Link>
-              <Link
-                href="/signup"
-                className="bg-[#2D6A4F] hover:bg-[#23533E] text-white font-semibold text-sm px-6 py-3 rounded-md transition-colors cursor-pointer"
-              >
-                Create Account
-              </Link>
             </>
+          ) : (
+            <Link
+              href="/dashboard"
+              className="bg-[#1E4D2B] hover:bg-[#173B21] text-white font-semibold text-sm px-6 py-3 rounded-md transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <span>Go to Your Dashboard ({user.name})</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           )}
 
           <Link
@@ -87,16 +81,16 @@ export default function LandingPage() {
       </section>
 
       {/* ========================================================= */}
-      {/* 2. INSTANT TESTNET 1-CLICK ROLES SELECTOR                 */}
+      {/* 2. INSTANT TESTNET 1-CLICK ROLES SIGN-IN                  */}
       {/* ========================================================= */}
       <section className="bg-white border border-[#D1D9D1] rounded-xl p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D1D9D1] pb-3">
           <div>
             <h2 className="text-base font-bold text-stone-900">
-              Interactive Testnet Sandbox
+              Interactive Testnet Sandbox Profiles
             </h2>
             <p className="text-xs text-stone-600">
-              Select any role to immediately test the live escrow workflow on Stellar Testnet:
+              Sign in with a pre-configured testnet profile to experience the live escrow workflow on Stellar:
             </p>
           </div>
           <span className="text-[11px] font-mono font-medium text-stone-600 bg-[#E4EDE2] px-2.5 py-1 rounded">
@@ -192,7 +186,7 @@ export default function LandingPage() {
       {/* 3. PROTOCOL INTERFACE SPECIFICATION & ARCHITECTURE        */}
       {/* ========================================================= */}
       <section className="bg-white border border-[#D1D9D1] rounded-xl p-6 sm:p-8 space-y-6">
-        <div className="flex items-center justify-between border-b border-[#D1D9D1] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D1D9D1] pb-4">
           <div>
             <h2 className="text-xl font-bold text-stone-900">
               Protocol Specifications & Smart Contract Configuration
@@ -202,11 +196,11 @@ export default function LandingPage() {
             </p>
           </div>
           <Link
-            href="/dashboard"
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#1E4D2B] hover:underline"
+            href="/docs"
+            className="text-xs font-semibold text-[#1E4D2B] hover:underline flex items-center gap-1"
           >
-            <span>Open In Dashboard</span>
-            <ExternalLink className="w-3.5 h-3.5" />
+            <span>View Full Technical Docs</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
@@ -279,14 +273,36 @@ export default function LandingPage() {
           </table>
         </div>
 
-        <div className="pt-2 flex items-center justify-end">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#1E4D2B] hover:bg-[#173B21] text-white text-xs font-semibold transition-colors"
-          >
-            <span>Proceed to Dashboard</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+        {/* Section bottom action: Sign Up & Sign In */}
+        <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
+          <div className="text-xs text-stone-600">
+            Ready to secure cross-border commodity escrows on Stellar?
+          </div>
+          {!user ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/login"
+                className="px-4 py-2 rounded-md border border-[#D1D9D1] bg-white text-stone-800 text-xs font-semibold hover:bg-stone-50 transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#1E4D2B] hover:bg-[#173B21] text-white text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <span>Create Account to Access Dashboard</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          ) : (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-[#1E4D2B] hover:bg-[#173B21] text-white text-xs font-semibold transition-colors"
+            >
+              <span>Go to Your Dashboard</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          )}
         </div>
       </section>
     </div>

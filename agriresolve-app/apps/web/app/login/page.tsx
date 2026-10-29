@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, UserRole } from "../../lib/auth";
 import { LeafLogo } from "../../components/LeafLogo";
 import {
@@ -16,8 +16,11 @@ import {
   Loader2,
 } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/dashboard";
+
   const { login, loginAsRole, loginWithWallet } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,17 +29,17 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
+    if (!email.trim()) {
       setError("Please enter your email");
       return;
     }
     setIsLoading(true);
     setError(null);
     try {
-      await login(email);
-      router.push("/dashboard");
+      await login(email.trim(), password);
+      router.push(redirectPath);
     } catch (err: any) {
-      setError(err?.message || "Failed to log in");
+      setError(err?.message || "Failed to log in. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -44,14 +47,14 @@ export default function LoginPage() {
 
   const handleDemoLogin = (role: UserRole) => {
     loginAsRole(role);
-    router.push("/dashboard");
+    router.push(redirectPath);
   };
 
   const handleWalletLogin = async () => {
     setIsLoading(true);
     try {
       await loginWithWallet();
-      router.push("/dashboard");
+      router.push(redirectPath);
     } catch (err) {
       console.error(err);
     } finally {
@@ -78,13 +81,13 @@ export default function LoginPage() {
         {/* 1-Click Fast Testnet Demo Profiles */}
         <div className="border border-[#D1D9D1] bg-[#F8FAF7] rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-stone-900">1-Click Testnet Demo Access</span>
+            <span className="font-bold text-stone-900">1-Click Testnet Demo Profiles</span>
             <span className="text-[10px] bg-[#DCEBCA] text-[#1E4D2B] px-2 py-0.5 rounded font-mono font-bold">
               Instant
             </span>
           </div>
           <p className="text-[11px] text-stone-600">
-            Select a role to immediately enter the dashboard with active test escrows:
+            Sign in as a demo stakeholder to explore the platform:
           </p>
 
           <div className="grid grid-cols-1 gap-2 pt-1">
@@ -244,5 +247,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-lg mx-auto py-12 text-center text-xs text-stone-600">
+          Loading sign in...
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

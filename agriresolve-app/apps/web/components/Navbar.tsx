@@ -11,8 +11,9 @@ export function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
+  // Only show Dashboard in navigation if user is logged in
   const navLinks = [
-    { href: "/dashboard", label: "Dashboard" },
+    ...(user ? [{ href: "/dashboard", label: "Dashboard" }] : []),
     { href: "/escrows", label: "Escrows" },
     { href: "/disputes", label: "AI Disputes" },
     { href: "/docs", label: "Protocol Docs" },
@@ -84,7 +85,7 @@ export function Navbar() {
               </Link>
               <Link
                 href="/signup"
-                className="px-3.5 py-1.5 rounded-md bg-[#2D6A4F] hover:bg-[#23533E] text-white text-xs font-semibold transition-colors"
+                className="px-3.5 py-1.5 rounded-md bg-[#1E4D2B] hover:bg-[#173B21] text-white text-xs font-semibold transition-colors"
               >
                 Sign Up
               </Link>

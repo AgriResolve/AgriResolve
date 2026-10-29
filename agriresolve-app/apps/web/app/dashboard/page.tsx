@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth, DEMO_USERS, UserRole } from "../../lib/auth";
-import { DEMO_TRADES, EscrowState, shortenAddress } from "../../lib/stellar";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../lib/auth";
+import { DEMO_TRADES, EscrowState } from "../../lib/stellar";
 import {
   FileText,
   Users,
@@ -14,7 +15,6 @@ import {
   MoreHorizontal,
   MoreVertical,
   Check,
-  AlertCircle,
   RotateCcw,
   Upload,
   Copy,
@@ -23,12 +23,15 @@ import {
   FileCheck2,
   Scale,
   ExternalLink,
-  ShieldAlert,
+  Lock,
+  ArrowRight,
+  Loader2,
+  Wallet,
 } from "lucide-react";
 
 export default function DashboardPage() {
-  const { user, logout, loginAsRole } = useAuth();
-  const [selectedTrade, setSelectedTrade] = useState(DEMO_TRADES[0]);
+  const router = useRouter();
+  const { user, isLoading, logout, switchRole } = useAuth();
   const [currentStep, setCurrentStep] = useState<EscrowState>(EscrowState.Disputed);
   const [copied, setCopied] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<
@@ -44,6 +47,13 @@ export default function DashboardPage() {
   ]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [disputeMessage, setDisputeMessage] = useState<string | null>(null);
+
+  // Authentication guard: Only signed in / registered users can access the dashboard
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace("/login?redirect=/dashboard");
+    }
+  }, [user, isLoading, router]);
 
   const copyTradeId = () => {
     navigator.clipboard.writeText("AGRI-USDC-7842");
@@ -76,38 +86,78 @@ export default function DashboardPage() {
     }, 1200);
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Top Banner if user is demo */}
-      {!user && (
-        <div className="bg-white border border-[#D1D9D1] rounded-lg p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-stone-700">
-            <span className="w-2 h-2 rounded-full bg-[#1E4D2B]" />
-            <span className="font-semibold text-stone-900">Viewing Testnet Escrow Sandbox.</span>
-            <span>Switch role to test party perspectives:</span>
+  // If loading session
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 space-y-3">
+        <Loader2 className="w-8 h-8 text-[#1E4D2B] animate-spin" />
+        <p className="text-xs text-stone-600 font-medium">Verifying account credentials...</p>
+      </div>
+    );
+  }
+
+  // If unauthenticated: Access gate
+  if (!user) {
+    return (
+      <div className="max-w-md mx-auto py-16 px-4">
+        <div className="bg-white border border-[#D1D9D1] rounded-xl p-8 text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-[#E4EDE2] text-[#1E4D2B] flex items-center justify-center mx-auto">
+            <Lock className="w-6 h-6" />
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => loginAsRole("farmer")}
-              className="px-2.5 py-1 rounded bg-[#E4EDE2] border border-[#D1D9D1] font-medium text-stone-800 hover:bg-[#D1D9D1] transition-colors"
+          <h2 className="text-xl font-bold text-stone-900">
+            Sign In Required
+          </h2>
+          <p className="text-xs text-stone-600 leading-relaxed">
+            You must have an active AgriResolve account to access this agricultural escrow dashboard.
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row items-center gap-2.5">
+            <Link
+              href="/login"
+              className="w-full py-2.5 rounded-md bg-[#1E4D2B] hover:bg-[#173B21] text-white text-xs font-semibold transition-colors"
             >
-              Farmer Santos
-            </button>
-            <button
-              onClick={() => loginAsRole("buyer")}
-              className="px-2.5 py-1 rounded bg-[#E4EDE2] border border-[#D1D9D1] font-medium text-stone-800 hover:bg-[#D1D9D1] transition-colors"
+              Sign In
+            </Link>
+            <Link
+              href="/signup"
+              className="w-full py-2.5 rounded-md border border-[#D1D9D1] bg-white hover:bg-stone-50 text-stone-800 text-xs font-semibold transition-colors"
             >
-              Buyer AgriCorp
-            </button>
-            <button
-              onClick={() => loginAsRole("arbiter")}
-              className="px-2.5 py-1 rounded bg-[#E4EDE2] border border-[#D1D9D1] font-medium text-stone-800 hover:bg-[#D1D9D1] transition-colors"
-            >
-              Arbiter Dr. Vance
-            </button>
+              Create Account
+            </Link>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Logged in User Bar */}
+      <div className="bg-white border border-[#D1D9D1] rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5 text-stone-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#1E4D2B]" />
+          <span className="font-bold text-stone-900">Active Profile:</span>
+          <span className="font-semibold text-stone-800">{user.name}</span>
+          <span className="bg-[#DCEBCA] text-[#1E4D2B] font-bold text-[10px] px-2 py-0.5 rounded capitalize">
+            {user.role}
+          </span>
+          <span className="hidden md:inline text-stone-400">•</span>
+          <span className="hidden md:inline text-stone-600">{user.companyName}</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1.5 font-mono text-[11px] text-stone-600 bg-[#F8FAF7] px-2.5 py-1 rounded border border-[#D1D9D1]">
+            <Wallet className="w-3.5 h-3.5 text-[#1E4D2B]" />
+            <span>Balance: {user.balance.toLocaleString()} USDC</span>
+          </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-1 text-[11px] font-semibold text-stone-600 hover:text-red-700 transition-colors cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
 
       {/* Main Grid: Matches the reference image layout precisely */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -120,10 +170,10 @@ export default function DashboardPage() {
             <div className="bg-[#4E7A58] hover:bg-[#3E6547] text-white rounded-lg p-2.5 flex items-center justify-between transition-colors cursor-pointer">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-6 h-6 rounded bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 text-white font-bold text-xs">
-                  {user ? user.companyName?.charAt(0) || "A" : "A"}
+                  {user.companyName?.charAt(0) || user.name.charAt(0)}
                 </div>
                 <div className="truncate text-xs font-semibold">
-                  {user ? user.companyName || user.name : "AgriResolve Hub"}
+                  {user.companyName || user.name}
                 </div>
               </div>
               <ChevronDown className="w-4 h-4 text-white/80 flex-shrink-0" />
@@ -180,27 +230,15 @@ export default function DashboardPage() {
             <div className="border-t border-[#D1D9D1] my-1" />
 
             {/* Navigation Link: Exit / Sign Out */}
-            {user ? (
-              <button
-                onClick={logout}
-                className="p-2.5 rounded-lg text-stone-700 hover:bg-red-50 hover:text-red-700 flex items-center gap-3 text-xs font-medium text-left transition-colors mt-auto"
-              >
-                <div className="w-5 h-5 flex items-center justify-center">
-                  <LogOut className="w-4 h-4" />
-                </div>
-                <span>Sign Out</span>
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                className="p-2.5 rounded-lg text-stone-700 hover:bg-stone-100 flex items-center gap-3 text-xs font-medium transition-colors mt-auto"
-              >
-                <div className="w-5 h-5 flex items-center justify-center text-stone-600">
-                  <LogOut className="w-4 h-4" />
-                </div>
-                <span>Sign In</span>
-              </Link>
-            )}
+            <button
+              onClick={logout}
+              className="p-2.5 rounded-lg text-stone-700 hover:bg-red-50 hover:text-red-700 flex items-center gap-3 text-xs font-medium text-left transition-colors mt-auto cursor-pointer"
+            >
+              <div className="w-5 h-5 flex items-center justify-center">
+                <LogOut className="w-4 h-4" />
+              </div>
+              <span>Sign Out</span>
+            </button>
           </div>
         </aside>
 
@@ -238,7 +276,6 @@ export default function DashboardPage() {
               <div className="relative flex items-center justify-between">
                 {/* Connecting Line */}
                 <div className="absolute left-6 right-6 top-4 -translate-y-1/2 flex items-center z-0">
-                  {/* Step 1 to Step 2 */}
                   <div
                     className={`h-[2px] flex-1 ${
                       currentStep >= EscrowState.Delivered
@@ -246,7 +283,6 @@ export default function DashboardPage() {
                         : "bg-[#D1D9D1]"
                     }`}
                   />
-                  {/* Step 2 to Step 3 */}
                   <div
                     className={`h-[2px] flex-1 ${
                       currentStep >= EscrowState.Disputed
@@ -254,7 +290,6 @@ export default function DashboardPage() {
                         : "bg-[#D1D9D1]"
                     }`}
                   />
-                  {/* Step 3 to Step 4 */}
                   <div
                     className={`h-[2px] flex-1 ${
                       currentStep >= EscrowState.Resolved
@@ -262,7 +297,6 @@ export default function DashboardPage() {
                         : "bg-[#D1D9D1]"
                     }`}
                   />
-                  {/* Step 4 to Step 5 */}
                   <div
                     className={`h-[2px] flex-1 ${
                       currentStep === EscrowState.Refunded
@@ -495,16 +529,24 @@ export default function DashboardPage() {
               {/* Buyer */}
               <div className="py-2.5 flex items-center justify-between">
                 <span className="font-medium text-stone-700">Buyer</span>
-                <span className="font-mono text-stone-900 bg-stone-100 px-2 py-0.5 rounded">
-                  GAHY...O6SS
+                <span className={`font-mono text-xs px-2 py-0.5 rounded ${
+                  user.role === "buyer"
+                    ? "bg-[#DCEBCA] text-[#1E4D2B] font-bold"
+                    : "bg-stone-100 text-stone-900"
+                }`}>
+                  {user.role === "buyer" ? `${user.name} (You)` : "GAHY...O6SS"}
                 </span>
               </div>
 
               {/* Farmer */}
               <div className="py-2.5 flex items-center justify-between">
                 <span className="font-medium text-stone-700">Farmer</span>
-                <span className="font-mono text-stone-900 bg-stone-100 px-2 py-0.5 rounded">
-                  GBJ5...FARM
+                <span className={`font-mono text-xs px-2 py-0.5 rounded ${
+                  user.role === "farmer"
+                    ? "bg-[#DCEBCA] text-[#1E4D2B] font-bold"
+                    : "bg-stone-100 text-stone-900"
+                }`}>
+                  {user.role === "farmer" ? `${user.name} (You)` : "GBJ5...FARM"}
                 </span>
               </div>
 
@@ -527,8 +569,10 @@ export default function DashboardPage() {
               {/* Arbiter Oracle */}
               <div className="py-2.5 flex items-center justify-between">
                 <span className="font-medium text-stone-700">Arbiter Node</span>
-                <span className="font-mono text-stone-600">
-                  SGS (GCS3...K8L)
+                <span className={`font-mono text-xs ${
+                  user.role === "arbiter" ? "text-[#1E4D2B] font-bold" : "text-stone-600"
+                }`}>
+                  {user.role === "arbiter" ? `${user.name} (Active Arbiter)` : "SGS (GCS3...K8L)"}
                 </span>
               </div>
             </div>

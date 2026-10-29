@@ -15,6 +15,7 @@ export interface UserProfile {
   reputationScore: number;
   joinedDate: string;
   country: string;
+  password?: string;
 }
 
 export const DEMO_USERS: Record<UserRole, UserProfile> = {
@@ -59,34 +60,50 @@ export const DEMO_USERS: Record<UserRole, UserProfile> = {
 interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
-  login: (email: string) => Promise<boolean>;
+  login: (email: string, password?: string) => Promise<boolean>;
   loginAsRole: (role: UserRole) => void;
   loginWithWallet: (address?: string) => Promise<void>;
   signup: (data: {
     name: string;
     email: string;
+    password?: string;
     role: UserRole;
     companyName?: string;
     walletAddress?: string;
     country?: string;
-  }) => Promise<void>;
+  }) => Promise<UserProfile>;
   logout: () => void;
   switchRole: (role: UserRole) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = "agriresolve_user_session";
+const SESSION_STORAGE_KEY = "agriresolve_user_session";
+const REGISTERED_USERS_KEY = "agriresolve_registered_users";
+
+function generateStellarAddress(role: UserRole): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let suffix = "";
+  for (let i = 0; i < 50; i++) {
+    suffix += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  const prefix = role === "farmer" ? "GB" : role === "buyer" ? "GA" : "GC";
+  return `${prefix}${suffix.slice(0, 54)}`;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load session from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setUser(JSON.parse(stored));
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setUser(parsed);
+        }
       }
     } catch (e) {
       console.error("Failed to load session from localStorage", e);
@@ -97,10 +114,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const saveUser = (newUser: UserProfile | null) => {
     setUser(newUser);
-    if (newUser) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
+    if (typeof window !== "undefined") {
+      if (newUser) {
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newUser));
+      } else {
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+      }
+    }
+  };
+
+  const getRegisteredUsers = (): UserProfile[] => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(REGISTERED_USERS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
     }
   };
 
@@ -109,28 +138,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     saveUser(demo);
   };
 
-  const login = async (email: string): Promise<boolean> => {
-    // Check if matching demo user
+  const login = async (email: string, password?: string): Promise<boolean> => {
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Check if matching a demo user
     const matchedRole = (Object.keys(DEMO_USERS) as UserRole[]).find(
-      (r) => DEMO_USERS[r].email.toLowerCase() === email.toLowerCase()
+      (r) => DEMO_USERS[r].email.toLowerCase() === cleanEmail
     );
     if (matchedRole) {
       saveUser(DEMO_USERS[matchedRole]);
       return true;
     }
-    // Default account creation on login if custom email
+
+    // 2. Check if in registered users list
+    const registered = getRegisteredUsers();
+    const existing = registered.find(
+      (u) => u.email.trim().toLowerCase() === cleanEmail
+    );
+    if (existing) {
+      if (password && existing.password && existing.password !== password) {
+        throw new Error("Incorrect password for this account.");
+      }
+      saveUser(existing);
+      return true;
+    }
+
+    // 3. Fallback: Create and sign in user immediately
+    const namePart = email.split("@")[0].replace(/[\._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
     const newUser: UserProfile = {
       id: `usr_${Date.now()}`,
-      name: email.split("@")[0].replace(/[\._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      email,
+      name: namePart,
+      email: cleanEmail,
       role: "farmer",
-      walletAddress: "GBJ5W4M4R5VTYOUCYA3E62L6JCG37VHYK2YGB6U2NZZK3J6D22A7FARM",
-      companyName: "Agricultural Operations",
-      balance: 5000,
+      walletAddress: generateStellarAddress("farmer"),
+      companyName: `${namePart}'s Farm Operations`,
+      balance: 10000,
       reputationScore: 100,
       joinedDate: "Today",
       country: "Global",
+      password: password || undefined,
     };
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        REGISTERED_USERS_KEY,
+        JSON.stringify([...registered, newUser])
+      );
+    }
     saveUser(newUser);
     return true;
   };
@@ -154,11 +208,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const newUser: UserProfile = {
       id: `usr_wallet_${addr.slice(0, 8)}`,
       name: `Trader ${addr.slice(0, 4)}...${addr.slice(-4)}`,
-      email: `trader-${addr.slice(0, 6).toLowerCase()}@stellar.account`,
+      email: `trader-${addr.slice(0, 6).toLowerCase()}@stellar.org`,
       role: "buyer",
       walletAddress: addr,
-      companyName: "Soroban Web3 Trader",
-      balance: 10000,
+      companyName: "Stellar Soroban Trader",
+      balance: 25000,
       reputationScore: 98,
       joinedDate: "Today",
       country: "Stellar Network",
@@ -169,25 +223,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (data: {
     name: string;
     email: string;
+    password?: string;
     role: UserRole;
     companyName?: string;
     walletAddress?: string;
     country?: string;
-  }) => {
-    const demo = DEMO_USERS[data.role];
+  }): Promise<UserProfile> => {
+    const cleanEmail = data.email.trim().toLowerCase();
+    const registered = getRegisteredUsers();
+
+    const existing = registered.find(
+      (u) => u.email.trim().toLowerCase() === cleanEmail
+    );
+    if (existing) {
+      // User already exists, update and sign in
+      saveUser(existing);
+      return existing;
+    }
+
+    const wallet = data.walletAddress?.trim() || generateStellarAddress(data.role);
+
     const newUser: UserProfile = {
       id: `usr_${Date.now()}`,
-      name: data.name,
-      email: data.email,
+      name: data.name.trim(),
+      email: cleanEmail,
       role: data.role,
-      companyName: data.companyName || `${data.name}'s Agricultural Services`,
-      walletAddress: data.walletAddress || demo.walletAddress,
-      balance: data.role === "buyer" ? 25000 : data.role === "farmer" ? 10000 : 2500,
+      companyName: data.companyName?.trim() || `${data.name.trim()}'s Agricultural Enterprise`,
+      walletAddress: wallet,
+      balance: data.role === "buyer" ? 35000 : data.role === "farmer" ? 15000 : 5000,
       reputationScore: 100,
-      joinedDate: "Just now",
-      country: data.country || "Global",
+      joinedDate: "October 2026",
+      country: data.country || "United States",
+      password: data.password || undefined,
     };
+
+    // Save to registered list
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(
+          REGISTERED_USERS_KEY,
+          JSON.stringify([...registered, newUser])
+        );
+      } catch (e) {
+        console.error("Failed to save registered user", e);
+      }
+    }
+
+    // Immediately activate session
     saveUser(newUser);
+    return newUser;
   };
 
   const logout = () => {
