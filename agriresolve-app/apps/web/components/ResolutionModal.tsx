@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, ShieldAlert, Cpu, X, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle2, ShieldAlert, X, Loader2 } from "lucide-react";
+import { formatStroops } from "../lib/stellar";
 
 interface ResolutionModalProps {
   isOpen: boolean;
@@ -32,7 +33,6 @@ export function ResolutionModal({
   async function handleExecute() {
     setSubmitting(true);
     try {
-      // Simulate on-chain contract call execute_resolution(arbiter, escrow_id, buyer_share, farmer_share)
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setSuccess(true);
       if (onExecuted) onExecuted();
@@ -44,86 +44,76 @@ export function ResolutionModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-zinc-900 border border-emerald-500/30 rounded-2xl max-w-lg w-full p-6 relative">
+    <div className="fixed inset-0 bg-stone-900/60 z-50 flex items-center justify-center p-4">
+      <div className="bg-white border border-[#D1D9D1] rounded-xl max-w-lg w-full p-6 relative text-stone-900">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-200"
+          className="absolute top-4 right-4 text-stone-400 hover:text-stone-700"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-2 mb-4 text-emerald-400">
+        <div className="flex items-center gap-2 mb-3 text-[#1E4D2B]">
           <ShieldAlert className="w-6 h-6" />
-          <h3 className="text-lg font-bold text-zinc-100">Execute Dispute Resolution</h3>
+          <h3 className="text-lg font-bold text-stone-900">Execute Dispute Settlement</h3>
         </div>
 
-        <p className="text-xs text-zinc-400 mb-6">
-          This triggers the Soroban <code className="text-emerald-300">execute_resolution</code> function.
-          Balances will be atomically distributed to the buyer and farmer wallets via the SAC Token Client.
+        <p className="text-xs text-stone-600 mb-5 leading-relaxed">
+          Executes the Soroban <code className="bg-[#F8FAF7] border border-[#D1D9D1] px-1 py-0.5 rounded font-mono font-bold text-stone-800">execute_resolution</code> function. Funds will be atomically settled to the buyer and farmer wallets on Stellar Testnet.
         </p>
 
-        <div className="bg-zinc-950 rounded-xl p-4 border border-zinc-800 space-y-3 mb-6">
+        <div className="bg-[#F8FAF7] rounded-lg p-4 border border-[#D1D9D1] space-y-3 mb-5">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-zinc-400">Escrow ID:</span>
-            <span className="font-mono text-zinc-200">#{escrowId}</span>
+            <span className="font-medium text-stone-600">Escrow Contract ID:</span>
+            <span className="font-mono font-bold text-stone-900">#{escrowId}</span>
           </div>
           <div className="flex justify-between items-center text-xs">
-            <span className="text-zinc-400">Total Escrow Amount:</span>
-            <span className="font-mono text-zinc-200">{(totalAmount / 10_000_000).toFixed(2)} USDC</span>
+            <span className="font-medium text-stone-600">Total Collateral:</span>
+            <span className="font-mono font-bold text-stone-900">{formatStroops(totalAmount)} USDC</span>
           </div>
-          <div className="flex justify-between items-center text-xs text-emerald-400 font-semibold border-t border-zinc-800 pt-2">
-            <span>Buyer Split:</span>
-            <span className="font-mono">{(buyerShare / 10_000_000).toFixed(2)} USDC</span>
+          <div className="border-t border-[#D1D9D1] pt-2 flex justify-between items-center text-xs">
+            <span className="font-medium text-stone-700">Buyer Refund Share:</span>
+            <span className="font-mono font-bold text-blue-700">{formatStroops(buyerShare)} USDC</span>
           </div>
-          <div className="flex justify-between items-center text-xs text-emerald-400 font-semibold">
-            <span>Farmer Split:</span>
-            <span className="font-mono">{(farmerShare / 10_000_000).toFixed(2)} USDC</span>
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-medium text-stone-700">Farmer Payout Share:</span>
+            <span className="font-mono font-bold text-[#1E4D2B]">{formatStroops(farmerShare)} USDC</span>
           </div>
-          {proofHash && (
-            <div className="pt-2 border-t border-zinc-800">
-              <span className="text-[11px] text-zinc-500 block mb-1">Attached Off-Chain Audit Hash:</span>
-              <span className="font-mono text-[10px] text-zinc-400 break-all">{proofHash}</span>
-            </div>
-          )}
         </div>
 
         {success ? (
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs text-center space-y-3">
-            <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-400" />
-            <p className="font-semibold text-sm">Resolution Successfully Executed On-Chain!</p>
-            <p className="text-zinc-400">Tokens have been atomically settled and trade status updated to Resolved.</p>
+          <div className="space-y-4">
+            <div className="p-3 bg-[#DCEBCA] border border-[#B8C7B7] rounded-md text-xs text-[#1E4D2B] font-semibold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Resolution settled on Stellar Soroban Testnet!</span>
+            </div>
             <button
               onClick={onClose}
-              className="mt-2 py-2 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-semibold text-xs"
+              className="w-full py-2.5 rounded-md bg-[#1E4D2B] text-white text-xs font-semibold hover:bg-[#173B21]"
             >
-              Close
+              Close Window
             </button>
           </div>
         ) : (
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              disabled={submitting}
-              className="flex-1 py-2.5 px-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium text-xs transition-colors"
+              className="flex-1 py-2 rounded-md border border-[#D1D9D1] bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleExecute}
               disabled={submitting}
-              className="flex-1 py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-zinc-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm shadow-emerald-950"
+              className="flex-1 py-2 rounded-md bg-[#1E4D2B] hover:bg-[#173B21] text-white text-xs font-semibold flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Submitting to Stellar...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Submitting Tx...</span>
                 </>
               ) : (
-                <>
-                  <span>Confirm Settlement</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
+                <span>Confirm & Settle</span>
               )}
             </button>
           </div>

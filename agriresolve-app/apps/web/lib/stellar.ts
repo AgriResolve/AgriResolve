@@ -20,6 +20,7 @@ export interface TradeDetails {
   arbiter: string;
   token: string;
   amount: number;
+  commodity?: string;
   state: EscrowState;
   deliveryHash?: string;
   expiry: number;
@@ -27,6 +28,54 @@ export interface TradeDetails {
   farmerShare: number;
   createdAt: number;
 }
+
+export const DEMO_TRADES: TradeDetails[] = [
+  {
+    id: 1,
+    buyer: "GAHYU5YGHEOI3MKA2MLW2O46YY74SHBLC4JTVGWN36LH7LL7FFF4O6SS",
+    farmer: "GBJ5W4M4R5VTYOUCYA3E62L6JCG37VHYK2YGB6U2NZZK3J6D22A7FARM",
+    arbiter: "GCS3ZJ46V3K2LL6A5Z9Z4K2M3G4N5B6V7C8X9Z0A1S2D3F4G5H6J7K8L",
+    token: "CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK",
+    amount: 15_000_000, // 1.5 USDC or scaled 15,000 USDC in display
+    commodity: "500 MT Grade-1 Non-GMO Soybeans",
+    state: EscrowState.Disputed,
+    deliveryHash: "84f9cfa549c318847d1cede87688c73cf9d125893c3a5a90ba74b82c5e325565",
+    expiry: Math.floor(Date.now() / 1000) + 86400 * 7,
+    buyerShare: 0,
+    farmerShare: 0,
+    createdAt: Math.floor(Date.now() / 1000) - 3600 * 4,
+  },
+  {
+    id: 2,
+    buyer: "GAHYU5YGHEOI3MKA2MLW2O46YY74SHBLC4JTVGWN36LH7LL7FFF4O6SS",
+    farmer: "GBV4X4M4R5VTYOUCYA3E62L6JCG37VHYK2YGB6U2NZZK3J6D22A7KOR2",
+    arbiter: "GCS3ZJ46V3K2LL6A5Z9Z4K2M3G4N5B6V7C8X9Z0A1S2D3F4G5H6J7K8L",
+    token: "CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK",
+    amount: 10_000_000, // 1.0 USDC
+    commodity: "300 MT Hard Red Winter Wheat",
+    state: EscrowState.Funded,
+    deliveryHash: "84f9cfa549c318847d1cede87688c73cf9d125893c3a5a90ba74b82c5e325565",
+    expiry: Math.floor(Date.now() / 1000) + 86400 * 3,
+    buyerShare: 0,
+    farmerShare: 0,
+    createdAt: Math.floor(Date.now() / 1000) - 86400 * 2,
+  },
+  {
+    id: 3,
+    buyer: "GDK3ZJ46V3K2LL6A5Z9Z4K2M3G4N5B6V7C8X9Z0A1S2D3F4G5H6J7BUY3",
+    farmer: "GBJ5W4M4R5VTYOUCYA3E62L6JCG37VHYK2YGB6U2NZZK3J6D22A7FARM",
+    arbiter: "GCS3ZJ46V3K2LL6A5Z9Z4K2M3G4N5B6V7C8X9Z0A1S2D3F4G5H6J7K8L",
+    token: "CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK",
+    amount: 25_000_000, // 2.5 USDC
+    commodity: "750 MT Organic Yellow Corn",
+    state: EscrowState.Resolved,
+    deliveryHash: "a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef",
+    expiry: Math.floor(Date.now() / 1000) - 3600,
+    buyerShare: 15_000_000,
+    farmerShare: 10_000_000,
+    createdAt: Math.floor(Date.now() / 1000) - 86400 * 5,
+  },
+];
 
 export function formatStroops(amount: number): string {
   return (amount / 10_000_000).toLocaleString(undefined, {
@@ -47,16 +96,16 @@ export function shortenAddress(addr: string): string {
 export function getStateBadge(state: EscrowState): { label: string; color: string } {
   switch (state) {
     case EscrowState.Funded:
-      return { label: "Funded", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" };
+      return { label: "Funded", color: "bg-[#DCEBCA] text-[#1E4D2B] border border-[#B8C7B7]" };
     case EscrowState.Delivered:
-      return { label: "Delivered", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" };
+      return { label: "Delivered", color: "bg-[#2D6A4F] text-white border border-[#2D6A4F]" };
     case EscrowState.Disputed:
-      return { label: "Disputed", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" };
+      return { label: "Disputed", color: "bg-white text-[#1E4D2B] border-2 border-[#1E4D2B] font-bold" };
     case EscrowState.Resolved:
-      return { label: "Resolved", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" };
+      return { label: "Resolved", color: "bg-[#1E4D2B] text-white border border-[#1E4D2B]" };
     case EscrowState.Refunded:
-      return { label: "Refunded", color: "bg-zinc-500/20 text-zinc-400 border-zinc-500/30" };
+      return { label: "Refunded", color: "bg-stone-200 text-stone-700 border border-stone-300" };
     default:
-      return { label: "Unknown", color: "bg-zinc-800 text-zinc-400 border-zinc-700" };
+      return { label: "Unknown", color: "bg-stone-100 text-stone-600 border border-stone-300" };
   }
 }

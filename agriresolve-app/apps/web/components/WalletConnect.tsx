@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Wallet, CheckCircle2, ChevronDown, ExternalLink } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { shortenAddress } from "../lib/stellar";
 
-export function WalletConnect() {
+export function WalletConnect({ className }: { className?: string }) {
   const [address, setAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
   async function connectWallet() {
     setIsConnecting(true);
     try {
-      // Connect using Freighter if available, or simulate testnet account
       if (typeof window !== "undefined" && (window as any).freighterApi) {
         const freighter = (window as any).freighterApi;
         const res = await freighter.requestAccess();
@@ -37,16 +36,12 @@ export function WalletConnect() {
   if (address) {
     return (
       <div className="flex items-center gap-2">
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-300">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          Testnet
-        </div>
         <button
           onClick={disconnect}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs font-mono hover:border-emerald-500/60 transition-colors"
+          className={`flex items-center gap-2 px-4 py-2 rounded-md bg-[#1E4D2B] hover:bg-[#173B21] text-white text-xs font-mono font-medium transition-colors border border-[#1E4D2B] ${className || ""}`}
           title="Click to disconnect"
         >
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-stone-200" />
           <span>{shortenAddress(address)}</span>
         </button>
       </div>
@@ -57,10 +52,9 @@ export function WalletConnect() {
     <button
       onClick={connectWallet}
       disabled={isConnecting}
-      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-zinc-950 text-sm font-semibold transition-all shadow-sm shadow-emerald-950"
+      className={`px-4 py-2 rounded-md bg-[#1E4D2B] hover:bg-[#173B21] text-white text-sm font-medium transition-colors border border-[#1E4D2B] cursor-pointer ${className || ""}`}
     >
-      <Wallet className="w-4 h-4" />
-      <span>{isConnecting ? "Connecting..." : "Connect Freighter"}</span>
+      {isConnecting ? "Connecting..." : "Connect Wallet"}
     </button>
   );
 }

@@ -12,6 +12,12 @@ node_modules/
 .next/
 out/
 .pnpm-store/
+*.tsbuildinfo
+
+# Reference assets
+Gemini_Generated_*.jpeg
+*.jpeg
+
 
 # Virtual Environment
 .venv/
