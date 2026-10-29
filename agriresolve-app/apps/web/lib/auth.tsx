@@ -8,6 +8,7 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   role: UserRole;
   walletAddress: string;
   companyName?: string;
@@ -66,6 +67,7 @@ interface AuthContextType {
   signup: (data: {
     name: string;
     email: string;
+    phone?: string;
     password?: string;
     role: UserRole;
     companyName?: string;
@@ -223,6 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (data: {
     name: string;
     email: string;
+    phone?: string;
     password?: string;
     role: UserRole;
     companyName?: string;
@@ -247,6 +250,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: `usr_${Date.now()}`,
       name: data.name.trim(),
       email: cleanEmail,
+      phone: data.phone?.trim() || undefined,
       role: data.role,
       companyName: data.companyName?.trim() || `${data.name.trim()}'s Agricultural Enterprise`,
       walletAddress: wallet,
