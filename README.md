@@ -252,4 +252,4 @@ Thanks to everyone who contributes to AgriResolve:
 
 ## License
 
-MIT License. Built for the Stellar Community & Drips Wave 11.
+MIT License.
