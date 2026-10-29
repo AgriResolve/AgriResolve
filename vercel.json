@@ -1,7 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "pnpm --prefix agriresolve-app/apps/web install",
-  "buildCommand": "pnpm --prefix agriresolve-app/apps/web build",
-  "outputDirectory": "agriresolve-app/apps/web/.next",
-  "framework": "nextjs"
-}
