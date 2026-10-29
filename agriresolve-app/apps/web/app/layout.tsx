@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
 import { AuthProvider } from "../lib/auth";
 
 export const metadata: Metadata = {
@@ -22,16 +23,7 @@ export default function RootLayout({
           <main className="flex-1 w-full">
             {children}
           </main>
-          <footer className="border-t border-[#D3CFC9] bg-white py-6 text-center text-xs text-stone-600">
-            <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-              <p className="font-semibold text-stone-700">
-                AgriResolve &bull; Simple, Safe Farm Deals &amp; Fair Dispute Settlement
-              </p>
-              <p className="text-stone-500 text-[11px]">
-                Protected Holding &bull; Verified Produce Delivery &bull; Proof-Based Pay
-              </p>
-            </div>
-          </footer>
+          <Footer />
         </AuthProvider>
       </body>
     </html>

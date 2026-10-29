@@ -108,7 +108,7 @@ function SignUpForm() {
               Account Created Successfully!
             </h3>
             <p className="text-xs text-stone-600">
-              Initializing your on-chain profile and redirecting to your dashboard...
+              Initializing your secure profile and redirecting to your dashboard...
             </p>
           </div>
         ) : (
@@ -286,13 +286,13 @@ function SignUpForm() {
 
               <div>
                 <label className="block text-xs font-bold text-stone-800 mb-1">
-                  Stellar Testnet Address <span className="font-normal text-stone-500">(Optional — auto-generated if blank)</span>
+                  Account Wallet Address <span className="font-normal text-stone-500">(Optional — auto-generated if blank)</span>
                 </label>
                 <input
                   type="text"
                   value={walletAddress}
                   onChange={(e) => setWalletAddress(e.target.value)}
-                  placeholder="G... (Leave blank to generate testnet keypair)"
+                  placeholder="G... (Leave blank to generate a secure digital address)"
                   className="w-full bg-[#F8FAF7] border border-[#D1D9D1] rounded-md px-3 py-2 text-xs font-mono text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#1E4D2B]"
                 />
               </div>

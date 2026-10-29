@@ -10,6 +10,11 @@ export function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
+  // On /dashboard, the page renders its own top header matching the reference mockup
+  if (pathname === "/dashboard") {
+    return null;
+  }
+
   return (
     <header className="border-b border-[#D3CFC9] bg-white sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

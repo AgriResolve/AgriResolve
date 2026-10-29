@@ -78,10 +78,10 @@ function LoginForm() {
           </p>
         </div>
 
-        {/* 1-Click Fast Testnet Demo Profiles */}
+        {/* 1-Click Fast Demo Accounts */}
         <div className="border border-[#D1D9D1] bg-[#F8FAF7] rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-stone-900">1-Click Testnet Demo Profiles</span>
+            <span className="font-bold text-stone-900">1-Click Fast Demo Accounts</span>
             <span className="text-[10px] bg-[#DCEBCA] text-[#1E4D2B] px-2 py-0.5 rounded font-mono font-bold">
               Instant
             </span>
