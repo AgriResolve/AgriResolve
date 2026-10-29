@@ -30,7 +30,7 @@ export default function EscrowsPage() {
             Agricultural Escrow Trades
           </h1>
           <p className="text-xs text-stone-600 mt-1">
-            Soroban smart contracts securing commodity shipments with automated oracle arbitration
+            Protected escrow holding for commodity shipments with automated proof-based dispute resolution
           </p>
         </div>
 

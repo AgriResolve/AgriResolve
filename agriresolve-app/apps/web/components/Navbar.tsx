@@ -27,7 +27,7 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Navigation Links */}
+          {/* Navigation Links: Strict rule: NO "Dashboard" or "Dispute Center" in navbar */}
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href="/#how-it-works"
@@ -36,55 +36,27 @@ export function Navbar() {
               How It Works
             </Link>
 
-            {user ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className={`text-sm font-semibold transition-colors ${
-                    pathname === "/dashboard"
-                      ? "text-[#1E4D2B] font-bold border-b-2 border-[#1E4D2B] pb-0.5"
-                      : "text-stone-700 hover:text-stone-900"
-                  }`}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/escrows"
-                  className={`text-sm font-semibold transition-colors ${
-                    pathname === "/escrows"
-                      ? "text-[#1E4D2B] font-bold border-b-2 border-[#1E4D2B] pb-0.5"
-                      : "text-stone-700 hover:text-stone-900"
-                  }`}
-                >
-                  Active Deals
-                </Link>
-                <Link
-                  href="/disputes"
-                  className={`text-sm font-semibold transition-colors ${
-                    pathname === "/disputes"
-                      ? "text-[#1E4D2B] font-bold border-b-2 border-[#1E4D2B] pb-0.5"
-                      : "text-stone-700 hover:text-stone-900"
-                  }`}
-                >
-                  Dispute Center
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/escrows"
-                  className="text-sm font-semibold text-stone-700 hover:text-[#1E4D2B] transition-colors"
-                >
-                  Deals Registry
-                </Link>
-                <Link
-                  href="/docs"
-                  className="text-sm font-semibold text-stone-700 hover:text-[#1E4D2B] transition-colors"
-                >
-                  Guides &amp; FAQ
-                </Link>
-              </>
-            )}
+            <Link
+              href="/escrows"
+              className={`text-sm font-semibold transition-colors ${
+                pathname === "/escrows"
+                  ? "text-[#1E4D2B] font-bold border-b-2 border-[#1E4D2B] pb-0.5"
+                  : "text-stone-700 hover:text-stone-900"
+              }`}
+            >
+              Deals Registry
+            </Link>
+
+            <Link
+              href="/docs"
+              className={`text-sm font-semibold transition-colors ${
+                pathname === "/docs"
+                  ? "text-[#1E4D2B] font-bold border-b-2 border-[#1E4D2B] pb-0.5"
+                  : "text-stone-700 hover:text-stone-900"
+              }`}
+            >
+              Guides &amp; FAQ
+            </Link>
           </nav>
         </div>
 
@@ -104,7 +76,7 @@ export function Navbar() {
               </Link>
               <button
                 onClick={logout}
-                className="p-1.5 rounded-md border border-[#D3CFC9] hover:bg-stone-100 text-stone-600 hover:text-red-700 transition-colors"
+                className="p-1.5 rounded-md border border-[#D3CFC9] hover:bg-stone-100 text-stone-600 hover:text-red-700 transition-colors cursor-pointer"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />

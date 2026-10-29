@@ -49,8 +49,8 @@ export function EvidenceUploader({ escrowId = 1, onAnalysisComplete }: EvidenceU
         <h3 className="font-bold text-stone-900">AI Dispute Evidence Intake</h3>
       </div>
       <p className="text-xs text-stone-600 leading-relaxed">
-        Upload harvest manifests, weighbridge tickets, or moisture certificates. The off-chain
-        oracle investigation reconciles contradictions and formats cryptographic split resolution proofs for contract execution.
+        Upload harvest manifests, weighbridge tickets, or moisture certificates. The verification
+        pipeline reconciles discrepancies and calculates fair split payouts based on actual proof.
       </p>
 
       <div className="space-y-4">

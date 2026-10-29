@@ -59,7 +59,7 @@ export function ResolutionModal({
         </div>
 
         <p className="text-xs text-stone-600 mb-5 leading-relaxed">
-          Executes the Soroban <code className="bg-[#F8FAF7] border border-[#D1D9D1] px-1 py-0.5 rounded font-mono font-bold text-stone-800">execute_resolution</code> function. Funds will be atomically settled to the buyer and farmer wallets on Stellar Testnet.
+          Executes the split settlement according to verified proof. Funds will be released to the buyer and farmer accounts.
         </p>
 
         <div className="bg-[#F8FAF7] rounded-lg p-4 border border-[#D1D9D1] space-y-3 mb-5">
@@ -85,7 +85,7 @@ export function ResolutionModal({
           <div className="space-y-4">
             <div className="p-3 bg-[#DCEBCA] border border-[#B8C7B7] rounded-md text-xs text-[#1E4D2B] font-semibold flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Resolution settled on Stellar Soroban Testnet!</span>
+              <span>Resolution settled and funds released!</span>
             </div>
             <button
               onClick={onClose}
@@ -110,7 +110,7 @@ export function ResolutionModal({
               {submitting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Submitting Tx...</span>
+                  <span>Settling Payout...</span>
                 </>
               ) : (
                 <span>Confirm & Settle</span>

@@ -1,15 +1,26 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert, CheckCircle2, Truck, RefreshCw, AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../../lib/auth";
+import { ArrowLeft, ShieldAlert, CheckCircle2, Truck, RefreshCw, AlertTriangle, Lock, Loader2 } from "lucide-react";
 import { formatStroops, getStateBadge, shortenAddress, EscrowState, TradeDetails } from "../../../lib/stellar";
 import { ResolutionModal } from "../../../components/ResolutionModal";
 import { EvidenceUploader } from "../../../components/EvidenceUploader";
 
 export default function TradeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
   const resolvedParams = use(params);
   const tradeId = Number(resolvedParams.id);
+
+  // Authentication guard
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace(`/login?redirect=/trade/${tradeId}`);
+    }
+  }, [user, isLoading, router, tradeId]);
 
   const [trade, setTrade] = useState<TradeDetails>({
     id: tradeId,
@@ -34,18 +45,59 @@ export default function TradeDetailPage({ params }: { params: Promise<{ id: stri
 
   function handleFlagDispute() {
     setTrade((prev) => ({ ...prev, state: EscrowState.Disputed }));
-    setActionSuccess("Dispute flagged successfully on-chain! Funds are locked pending AI resolution.");
+    setActionSuccess("Dispute flagged successfully! Funds are locked in protected holding pending proof resolution.");
   }
 
   function handleConfirmDelivery() {
     const hash = deliveryHashInput || "84f9cfa549c318847d1cede87688c73cf9d125893c3a5a90ba74b82c5e325565";
     setTrade((prev) => ({ ...prev, state: EscrowState.Delivered, deliveryHash: hash }));
-    setActionSuccess("Delivery confirmation hash recorded on Stellar Testnet!");
+    setActionSuccess("Delivery confirmation recorded successfully!");
   }
 
   function handleRefund() {
     setTrade((prev) => ({ ...prev, state: EscrowState.Refunded, buyerShare: prev.amount, farmerShare: 0 }));
     setActionSuccess("Full refund processed back to buyer.");
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 space-y-3">
+        <Loader2 className="w-8 h-8 text-[#1E4D2B] animate-spin" />
+        <p className="text-xs text-stone-600 font-medium">Verifying credentials...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-md mx-auto py-16 px-4">
+        <div className="bg-white border border-[#D1D9D1] rounded-2xl p-8 text-center space-y-4 shadow-none">
+          <div className="w-12 h-12 rounded-full bg-[#E4EDE2] text-[#1E4D2B] flex items-center justify-center mx-auto">
+            <Lock className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-bold text-stone-900">
+            Sign In Required
+          </h2>
+          <p className="text-xs text-stone-600 leading-relaxed">
+            Trade and dispute details can only be viewed by authenticated trade participants.
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row items-center gap-2.5">
+            <Link
+              href={`/login?redirect=/trade/${tradeId}`}
+              className="w-full py-2.5 rounded-lg bg-[#1E4D2B] hover:bg-[#163820] text-white text-xs font-semibold transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/signup"
+              className="w-full py-2.5 rounded-lg border border-[#CAD8C8] bg-white hover:bg-stone-50 text-stone-800 text-xs font-semibold transition-colors"
+            >
+              Create Account
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
