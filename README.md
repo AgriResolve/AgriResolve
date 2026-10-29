@@ -3,10 +3,12 @@
 > **Soroban-Powered Agricultural Dispute Escrow Protocol**  
 > Drips Wave 11 Maintainer Application Blueprint & Protocol Architecture
 
+[![CI Quality Gates](https://github.com/HassanKorey/Agrires/actions/workflows/ci.yml/badge.svg)](https://github.com/HassanKorey/Agrires/actions/workflows/ci.yml)
 [![Soroban Contract Tests](https://img.shields.io/badge/Soroban%20Contract-11%20Tests%20Passing-brightgreen)](agriresolve-contract)
 [![Next.js 15](https://img.shields.io/badge/Next.js-15.5.28%20App%20Router-black)](agriresolve-app/apps/web)
 [![Rust 2021](https://img.shields.io/badge/Rust-2021%20wasm32-orange)](agriresolve-contract)
-[![Stellar Protocol](https://img.shields.io/badge/Stellar-Protocol%2022%2F29%20Testnet-blue)](https://stellar.expert)
+[![Stellar Testnet](https://img.shields.io/badge/Stellar-Protocol%2022%2F29%20Testnet-blue)](https://stellar.expert/explorer/testnet/contract/CAPZ2NHR5OYR45WH4BBFVKRG2UYII6P3DD3JNP6CJ6LQ4GJDZVOGITQ4)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
@@ -138,15 +140,15 @@ get_trade_count() -> u64
 
 ## 4. Deployed Testnet Deployment
 
-AgriResolve is configured for Stellar Soroban Testnet:
+AgriResolve is deployed and active on Stellar Soroban Testnet:
 
-| Resource | Address / ID |
-|---|---|
-| **AgriResolve Contract** | `<CONTRACT_ID>` |
-| **SEP-41 USDC Token** | `<USDC_TOKEN_ID>` |
-| **Admin Deployer** | `<ADMIN_ADDRESS>` |
-| **Testnet RPC** | `https://soroban-testnet.stellar.org` |
-| **Testnet Network Passphrase** | `Test SDF Network ; September 2015` |
+| Resource | Address / ID | Explorer Link |
+|---|---|:---:|
+| **AgriResolve Escrow Contract** | `CAPZ2NHR5OYR45WH4BBFVKRG2UYII6P3DD3JNP6CJ6LQ4GJDZVOGITQ4` | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CAPZ2NHR5OYR45WH4BBFVKRG2UYII6P3DD3JNP6CJ6LQ4GJDZVOGITQ4) |
+| **SEP-41 Testnet USDC Token** | `CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK` | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCQGOTGN6HTQE74XYERYSYVU57T5NPYWV5DLCROMB56OXTV6RSO6KIGK) |
+| **Testnet RPC** | `https://soroban-testnet.stellar.org` | — |
+| **Testnet Horizon** | `https://horizon-testnet.stellar.org` | — |
+| **Testnet Network Passphrase** | `Test SDF Network ; September 2015` | — |
 
 ---
 
@@ -205,6 +207,38 @@ python3 server.py
 2. **Mathematical Invariant Conservation**: In `execute_resolution`, the contract enforces `buyer_share + farmer_share == trade.amount` with checked integer arithmetic, preventing underflow, overflow, or stranded funds.
 3. **Dispute Locking**: Once a trade transitions to `Disputed`, normal delivery confirmations and unilateral refunds are permanently locked until resolution is executed.
 4. **TTL Storage Extension**: All trade storage entries automatically extend persistent TTL storage to preserve on-chain state indefinitely.
+
+---
+
+## 7. Maintainers & Community
+
+### Core Maintainer
+| Name | Role | GitHub | Telegram | Email |
+|---|---|---|---|---|
+| **Hassan Korey** | Protocol Architect & Lead Developer | [@HassanKorey](https://github.com/HassanKorey) | [@HassanKorey](https://t.me/HassanKorey) | `edunhassan1006@gmail.com` |
+
+### Ecosystem & Community
+- **Stellar Developers Discord:** [discord.gg/stellardev](https://discord.gg/stellardev)
+- **Stellar Community Fund:** [communityfund.stellar.org](https://communityfund.stellar.org)
+- **Drips Wave Maintainers:** [drips.network/wave/stellar](https://www.drips.network/wave/stellar)
+
+---
+
+## 8. Contributing & Security
+
+- **Contributing Guide**: Please review [CONTRIBUTING.md](CONTRIBUTING.md) for branch management, code style, and PR requirements.
+- **Code of Conduct**: We hold our community to the standards outlined in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- **Security Policy**: For vulnerability reporting and disclosure guidelines, consult [SECURITY.md](SECURITY.md).
+
+---
+
+## 9. Contributors
+
+Thanks to everyone who contributes to AgriResolve:
+
+<a href="https://github.com/HassanKorey/Agrires/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=HassanKorey/Agrires" alt="Contributors" />
+</a>
 
 ---
 
