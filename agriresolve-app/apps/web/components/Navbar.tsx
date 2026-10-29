@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { WalletConnect } from "./WalletConnect";
-import { Sprout, ShieldCheck, FileText, PlusCircle } from "lucide-react";
+import { Sprout, ShieldCheck, FileText, PlusCircle, BookOpen } from "lucide-react";
 
 export function Navbar() {
   return (
@@ -40,6 +40,13 @@ export function Navbar() {
             >
               <FileText className="w-4 h-4" />
               AI Evidence & Disputes
+            </Link>
+            <Link
+              href="/docs"
+              className="text-zinc-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+            >
+              <BookOpen className="w-4 h-4" />
+              Docs
             </Link>
           </nav>
         </div>

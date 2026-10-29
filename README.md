@@ -4,6 +4,7 @@
 > Drips Wave 11 Maintainer Application Blueprint & Protocol Architecture
 
 [![CI Quality Gates](https://github.com/HassanKorey/Agrires/actions/workflows/ci.yml/badge.svg)](https://github.com/HassanKorey/Agrires/actions/workflows/ci.yml)
+[![Documentation](https://img.shields.io/badge/Docs-GitBook%20%26%20In--App-emerald)](docs/README.md)
 [![Soroban Contract Tests](https://img.shields.io/badge/Soroban%20Contract-11%20Tests%20Passing-brightgreen)](agriresolve-contract)
 [![Next.js 15](https://img.shields.io/badge/Next.js-15.5.28%20App%20Router-black)](agriresolve-app/apps/web)
 [![Rust 2021](https://img.shields.io/badge/Rust-2021%20wasm32-orange)](agriresolve-contract)
@@ -28,6 +29,13 @@ Optimized in accordance with Drips Wave maintainer guidelines into two focused w
 
 ```
 AgriResolve/
+├── docs/                                    # GitBook-compatible protocol documentation
+│   ├── SUMMARY.md                           # Table of contents & navigation tree
+│   ├── protocol-mechanics/                  # State machine & worked economic settlement models
+│   ├── smart-contract/                      # Architecture, entrypoints API, errors & events
+│   ├── user-guides/                         # Farmer, Buyer, and Arbitrator operational guides
+│   └── developer-guide/                     # Local setup, Stellar SDK, and AI REST API
+│
 ├── agriresolve-contract/                    # Pure Rust Soroban workspace containing escrow state machine
 │   ├── Cargo.toml                           # Workspace root configuration with release profile optimization
 │   ├── Makefile                             # build, test, check, clean
