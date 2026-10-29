@@ -27,3 +27,4 @@
   * [AI Evidence Pipeline API](developer-guide/ai-pipeline-api.md)
 
 * [Contributing](contributing.md)
+* [Drips Wave Submission Package](SUBMISSION.md)
